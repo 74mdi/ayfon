@@ -16,8 +16,27 @@
   var progressLabel = document.getElementById('progress-label');
   var error = document.getElementById('error');
   var success = document.getElementById('success');
+  var themeToggle = document.getElementById('theme-toggle');
   var files = [];
   var busy = false;
+
+  function setTheme(theme, save) {
+    var dark = theme === 'dark';
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    themeToggle.textContent = dark ? '☼' : '☾';
+    themeToggle.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    themeToggle.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    if (save) {
+      try { window.localStorage.setItem('ayfon-theme', dark ? 'dark' : 'light'); } catch (ignore) {}
+    }
+  }
+
+  var savedTheme = '';
+  try { savedTheme = window.localStorage.getItem('ayfon-theme') || ''; } catch (ignore) {}
+  setTheme(savedTheme === 'dark' ? 'dark' : 'light', false);
+  themeToggle.addEventListener('click', function () {
+    setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark', true);
+  });
 
   function formatSize(bytes) {
     if (bytes < 1024 * 1024) return Math.max(1, Math.round(bytes / 1024)) + ' KB';
