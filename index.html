@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f3ef">
+  <meta name="description" content="Send original photos to Telegram, full quality and metadata intact.">
+  <title>ayfon — keep every detail</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <a class="wordmark" href="#top" aria-label="ayfon home">ayfon<span>·</span></a>
+      <span class="top-note">A quieter way to send</span>
+    </header>
+
+    <section class="intro" id="top">
+      <p class="eyebrow"><span class="live-dot"></span> ORIGINALS, ALWAYS</p>
+      <h1>Keep every<br><em>detail.</em></h1>
+      <p class="lede">Your photos, exactly as they are.<br>Sent to Telegram in full quality.</p>
+    </section>
+
+    <section class="workspace" aria-label="Photo uploader">
+      <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Choose photos to upload">
+        <input id="photo-input" type="file" accept="image/*" multiple>
+        <span class="plus" aria-hidden="true">＋</span>
+        <span class="drop-title">Choose your photos</span>
+        <span class="drop-caption">Tap to browse · select as many as you like</span>
+      </div>
+
+      <div class="selection" id="selection" hidden>
+        <div class="selection-head">
+          <div><span class="section-label">YOUR SELECTION</span><span class="selection-count" id="selection-count"></span></div>
+          <button class="text-button" id="clear-button" type="button">Clear</button>
+        </div>
+        <ul class="file-list" id="file-list"></ul>
+      </div>
+
+      <div class="settings">
+        <div class="section-label settings-label">DELIVERY</div>
+        <label class="field-label" for="bot-token">Telegram bot token</label>
+        <input class="text-input" id="bot-token" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste token from @BotFather">
+        <label class="field-label" for="chat-id">Chat ID</label>
+        <input class="text-input" id="chat-id" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Your chat, group, or channel ID">
+        <p class="privacy-note">Your credentials stay in this browser and are never saved.</p>
+      </div>
+
+      <button class="send-button" id="send-button" type="button" disabled>
+        <span id="send-label">Send originals</span><span class="arrow" aria-hidden="true">↗</span>
+      </button>
+      <div class="progress" id="progress" hidden>
+        <div class="progress-track"><span id="progress-fill"></span></div>
+        <span id="progress-label">Preparing…</span>
+      </div>
+      <p class="error" id="error" role="alert" hidden></p>
+      <p class="success" id="success" role="status" hidden></p>
+    </section>
+
+    <footer class="footer">
+      <span>NO COMPRESSION. NO SURPRISES.</span>
+      <span>Up to 50 MB per photo</span>
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
