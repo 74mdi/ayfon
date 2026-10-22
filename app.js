@@ -26,6 +26,9 @@
 
   function updateButton() {
     send.disabled = busy || !files.length || !token.value.trim() || !chat.value.trim();
+    clear.disabled = busy;
+    input.disabled = busy;
+    dropzone.setAttribute('aria-disabled', busy ? 'true' : 'false');
   }
 
   function renderFiles() {
@@ -61,12 +64,22 @@
   }
 
   function addFiles(fileList) {
+    if (busy) return;
+    var added = 0;
     Array.prototype.forEach.call(fileList, function (file) {
       if (file.type && file.type.indexOf('image/') !== 0) return;
       var duplicate = files.some(function (item) { return item.name === file.name && item.size === file.size && item.lastModified === file.lastModified; });
-      if (!duplicate) files.push({ file: file, name: file.name, size: file.size, lastModified: file.lastModified, preview: URL.createObjectURL(file), sent: false });
+      if (!duplicate) {
+        files.push({ file: file, name: file.name, size: file.size, lastModified: file.lastModified, preview: URL.createObjectURL(file), sent: false });
+        added += 1;
+      }
     });
-    error.hidden = true;
+    if (!added && fileList.length) {
+      error.textContent = 'No new photos were added. Choose image files that are not already in the selection.';
+      error.hidden = false;
+    } else {
+      error.hidden = true;
+    }
     success.hidden = true;
     renderFiles();
   }
@@ -100,10 +113,28 @@
     data.append('chat_id', chat.value.trim());
     data.append('document', item.file, item.name);
     return fetch('https://api.telegram.org/bot' + token.value.trim() + '/sendDocument', { method: 'POST', body: data }).then(function (response) {
-      return response.json().then(function (body) {
-        if (!response.ok || !body.ok) throw new Error(body.description || 'Telegram could not send ' + item.name + '.');
+      return response.json().catch(function () {
+        var parseError = new Error('Telegram returned an unreadable response for ' + item.name + '. Please retry.');
+        parseError.telegramError = true;
+        throw parseError;
+      }).then(function (body) {
+        if (!response.ok || !body.ok) {
+          var code = body.error_code || response.status;
+          var reason = body.description || 'Telegram could not send ' + item.name + '.';
+          if (code === 401) reason = 'The bot token is invalid or revoked. Check the token from @BotFather.';
+          else if (code === 403) reason = 'Telegram denied access. Start the bot in a private chat, or give it permission to post in the destination.';
+          else if (code === 400) reason = 'Telegram rejected the request. Check the chat ID and make sure the bot can access that chat. (' + reason + ')';
+          else if (code === 429) reason = 'Telegram is rate limiting uploads. Wait a little, then retry the remaining photos.';
+          else if (code === 413) reason = 'Telegram rejected ' + item.name + ' because it is too large. The current Bot API limit is 50 MB per file.';
+          var apiError = new Error(reason);
+          apiError.telegramError = true;
+          throw apiError;
+        }
         item.sent = true;
       });
+    }).catch(function (err) {
+      if (err && err.telegramError) throw err;
+      throw new Error('Could not connect to Telegram while sending ' + item.name + '. Check your internet connection and retry.');
     });
   }
 
